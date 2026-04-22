@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="How the 911 Hunter pricing model works: data sources, feature engineering, and model accuracy."><title>Methodology — 911 Hunter</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}:root{--red: #D5001C;--red-dim: #a5001a;--red-glow: rgba(213,0,28,.35);--bg: #0f0f0f;--bg-card: #161616;--border: #222;--border-hover: #333;--text: #f0f0f0;--text-muted: #888;--text-dim: #555;--green: #22c55e;--green-dim: #16a34a;--amber: #f59e0b;--orange: #f97316;--deal-exceptional: #00e676;--deal-good: #22c55e;--deal-fair: #f59e0b;--deal-slight: #f97316;--deal-over: #ef4444}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;font-size:15px;line-height:1.6;min-height:100vh}a{color:inherit;text-decoration:none}a:hover{color:var(--red)}img{display:block;max-width:100%}nav{position:sticky;top:0;z-index:100;background:#0f0f0ff2;backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:16px}.nav-logo{font-size:17px;font-weight:800;letter-spacing:-.5px;color:var(--text);display:flex;align-items:center;gap:8px}.nav-logo span{color:var(--red)}.nav-links{display:flex;gap:24px;list-style:none;font-size:13px;font-weight:500;color:var(--text-muted)}.nav-links a:hover,.nav-links a.active{color:var(--text)}footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text-dim);font-size:12px;margin-top:80px}footer a{color:var(--text-muted)}footer a:hover{color:var(--red)}.container{max-width:1400px;margin:0 auto;padding:0 24px}.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.4px;white-space:nowrap}::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:3px}
+.page-header[data-astro-cid-qn2a7f5i]{padding:48px 0 32px;border-bottom:1px solid var(--border);margin-bottom:48px}h1[data-astro-cid-qn2a7f5i]{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:12px}h1[data-astro-cid-qn2a7f5i] span[data-astro-cid-qn2a7f5i]{color:var(--red)}.subtitle[data-astro-cid-qn2a7f5i]{color:var(--text-muted);font-size:15px;max-width:600px;line-height:1.6}.stats-row[data-astro-cid-qn2a7f5i]{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px}@media (max-width: 700px){.stats-row[data-astro-cid-qn2a7f5i]{grid-template-columns:repeat(2,1fr)}}.stat-card[data-astro-cid-qn2a7f5i]{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center}.stat-val[data-astro-cid-qn2a7f5i]{font-size:28px;font-weight:800;color:var(--red);letter-spacing:-1px}.stat-label[data-astro-cid-qn2a7f5i]{font-size:12px;color:var(--text-muted);margin-top:4px}.section[data-astro-cid-qn2a7f5i]{margin-bottom:56px}.section[data-astro-cid-qn2a7f5i] h2[data-astro-cid-qn2a7f5i]{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}.section[data-astro-cid-qn2a7f5i] p[data-astro-cid-qn2a7f5i]{color:var(--text-muted);font-size:14px;line-height:1.7;margin-bottom:16px}.chart-wrap[data-astro-cid-qn2a7f5i]{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:24px;height:400px;position:relative}.steps[data-astro-cid-qn2a7f5i]{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:20px}.steps[data-astro-cid-qn2a7f5i] li[data-astro-cid-qn2a7f5i]{counter-increment:step;display:grid;grid-template-columns:32px 1fr;gap:16px;font-size:14px;color:var(--text-muted);line-height:1.7}.steps[data-astro-cid-qn2a7f5i] li[data-astro-cid-qn2a7f5i]:before{content:counter(step);display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--red);color:#fff;border-radius:50%;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px}.steps[data-astro-cid-qn2a7f5i] li[data-astro-cid-qn2a7f5i] strong[data-astro-cid-qn2a7f5i]{color:var(--text)}.steps[data-astro-cid-qn2a7f5i] code[data-astro-cid-qn2a7f5i]{font-family:monospace;font-size:12px;background:#ffffff0f;padding:1px 6px;border-radius:3px;color:#e2e2e2}.features-grid[data-astro-cid-qn2a7f5i]{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}@media (max-width: 700px){.features-grid[data-astro-cid-qn2a7f5i]{grid-template-columns:1fr}}.feature-card[data-astro-cid-qn2a7f5i]{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px}.feature-card[data-astro-cid-qn2a7f5i] h3[data-astro-cid-qn2a7f5i]{font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}.feature-card[data-astro-cid-qn2a7f5i] p[data-astro-cid-qn2a7f5i]{font-size:13px;margin-bottom:0}.limitations[data-astro-cid-qn2a7f5i]{list-style:none;display:flex;flex-direction:column;gap:16px}.limitations[data-astro-cid-qn2a7f5i] li[data-astro-cid-qn2a7f5i]{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text-muted);line-height:1.6;padding:14px 16px;border-left:3px solid var(--red)}.limitations[data-astro-cid-qn2a7f5i] li[data-astro-cid-qn2a7f5i] strong[data-astro-cid-qn2a7f5i]{color:var(--text)}.sources-grid[data-astro-cid-qn2a7f5i]{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media (max-width: 900px){.sources-grid[data-astro-cid-qn2a7f5i]{grid-template-columns:repeat(2,1fr)}}@media (max-width: 600px){.sources-grid[data-astro-cid-qn2a7f5i]{grid-template-columns:1fr}}.source-card[data-astro-cid-qn2a7f5i]{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px}.source-card[data-astro-cid-qn2a7f5i] h3[data-astro-cid-qn2a7f5i]{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}.source-card[data-astro-cid-qn2a7f5i] p[data-astro-cid-qn2a7f5i]{font-size:12px;margin-bottom:0;line-height:1.6}
+</style></head> <body> <nav> <a href="/911-hunter/" class="nav-logo"> <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--red)"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+911 <span>Hunter</span> </a> <ul class="nav-links"> <li><a href="/911-hunter/">Listings</a></li> <li><a href="/911-hunter/methodology">Methodology</a></li> </ul> </nav>  <main class="container" data-astro-cid-qn2a7f5i> <header class="page-header" data-astro-cid-qn2a7f5i> <h1 data-astro-cid-qn2a7f5i>How the <span data-astro-cid-qn2a7f5i>Pricing Model</span> Works</h1> <p class="subtitle" data-astro-cid-qn2a7f5i>
+A plain-English explanation of the data pipeline, model architecture,
+        and what each feature means for G-body 911 valuations.
+</p> </header> <!-- ── Model Stats ──────────────────────────────── --> <div class="stats-row" data-astro-cid-qn2a7f5i> <div class="stat-card" data-astro-cid-qn2a7f5i> <div class="stat-val" data-astro-cid-qn2a7f5i>180</div> <div class="stat-label" data-astro-cid-qn2a7f5i>BaT Sales in Training Set</div> </div> <div class="stat-card" data-astro-cid-qn2a7f5i> <div class="stat-val" data-astro-cid-qn2a7f5i>ML</div> <div class="stat-label" data-astro-cid-qn2a7f5i>Pricing Mode</div> </div> <div class="stat-card" data-astro-cid-qn2a7f5i> <div class="stat-val" data-astro-cid-qn2a7f5i>14</div> <div class="stat-label" data-astro-cid-qn2a7f5i>Model Features</div> </div> <div class="stat-card" data-astro-cid-qn2a7f5i> <div class="stat-val" data-astro-cid-qn2a7f5i>1974–1989</div> <div class="stat-label" data-astro-cid-qn2a7f5i>Year Range</div> </div> </div> <!-- ── Feature Importance Chart ─────────────────── --> <section class="section" data-astro-cid-qn2a7f5i> <h2 data-astro-cid-qn2a7f5i>Feature Importances</h2> <p data-astro-cid-qn2a7f5i>
+The chart below shows how much each input feature influences the model's
+        predicted price. Higher percentage = stronger impact on the final estimate.
+</p> <div class="chart-wrap" data-astro-cid-qn2a7f5i> <canvas id="importance-chart" height="320" data-astro-cid-qn2a7f5i></canvas> </div> </section> <!-- ── How It Works ─────────────────────────────── --> <section class="section" data-astro-cid-qn2a7f5i> <h2 data-astro-cid-qn2a7f5i>Step-by-Step: How a Listing Gets Scored</h2> <ol class="steps" data-astro-cid-qn2a7f5i> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Historical data collection.</strong> <code data-astro-cid-qn2a7f5i>scrape_historical.py</code> visits every Bring a Trailer sold listing
+          for G-body Porsche 911s and records the final sale price, mileage, color,
+          model variant, and descriptive flags like "matching numbers" or "rust."
+          This builds the training dataset.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Active listing collection.</strong> <code data-astro-cid-qn2a7f5i>scrape.py</code> hits 6 platforms (BaT, eBay Motors, AutoTrader, Cars.com,
+          Cars &amp; Bids, PCarMarket) and extracts every active G-body 911 for sale in
+          the US. Each listing gets a stable ID based on a hash of its URL.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Feature engineering.</strong>
+Each listing — historical and active — gets converted into 14 numeric features:
+          year, model rank, mileage, transmission type, color premium coefficient,
+          six boolean flags, prior owners, and BaT bid count.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Model training.</strong>
+A <strong data-astro-cid-qn2a7f5i>Gradient Boosting Regressor</strong> (scikit-learn) is trained on
+          historical sale prices using 5-fold cross-validation. GBR was chosen because it
+          handles mixed feature types, non-linear relationships, and small datasets better
+          than linear models.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Scoring.</strong>
+Each active listing is fed into the trained model to produce a
+<em data-astro-cid-qn2a7f5i>predicted_price</em>. The <em data-astro-cid-qn2a7f5i>deal_score</em> is calculated as:
+<code data-astro-cid-qn2a7f5i>(predicted − asking) / predicted × 100</code>.
+          A positive score means the car is priced below what the market data suggests.
+</li> </ol> </section> <!-- ── Feature Explanations ─────────────────────── --> <section class="section" data-astro-cid-qn2a7f5i> <h2 data-astro-cid-qn2a7f5i>What Each Feature Means</h2> <div class="features-grid" data-astro-cid-qn2a7f5i> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Mileage</h3> <p data-astro-cid-qn2a7f5i>The single strongest predictor. Lower mileage = higher price, with a
+          steep discount above ~120k miles and a significant premium below 50k.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Year / Age</h3> <p data-astro-cid-qn2a7f5i>Later production years (1984–1989 Carrera era) command higher prices than
+          early 1970s cars in most model categories. The 3.2L Carrera period is
+          especially sought-after.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Model Variant (Ordinal)</h3> <p data-astro-cid-qn2a7f5i>Encoded as a number from 1–8: Turbo (8) → Carrera RS (7) → RS (6) → SC (5)
+          → Carrera (4) → Targa/Cabriolet (3) → 911S (3) → 911E/T (2) → base (1).
+          This reflects real-world collector hierarchy.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Matching Numbers</h3> <p data-astro-cid-qn2a7f5i>Means the engine case number stamped at the factory matches the car's VIN
+          records. Cars with mismatched engines trade at a material discount. Matching
+          numbers is one of the most consistently rewarded attributes on BaT.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Manual Transmission</h3> <p data-astro-cid-qn2a7f5i>The 4- and 5-speed manual gearboxes are almost universally preferred over
+          the Sportomatic (semi-automatic) by collectors. Manual cars command a
+          consistent premium — the model captures this from the training data.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Rust Flag</h3> <p data-astro-cid-qn2a7f5i>Any mention of rust in the listing description is parsed as a negative
+          flag. G-body 911s are particularly susceptible to rust in the battery box,
+          rockers, and floor pans — serious rust can wipe out 20–30% of a car's value.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Project Car Flag</h3> <p data-astro-cid-qn2a7f5i>The single largest discount factor. Cars described as "project," "needs
+          work," or "barn find" are priced heavily below finished examples — often 30–50%
+          lower than a comparable driver-quality car.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Color Premium</h3> <p data-astro-cid-qn2a7f5i>Rare factory colors (Tangerine, Minerva Blue, Signal Orange, Slate Grey,
+          Viper Green) command documented premiums on BaT. Common colors (silver, white,
+          black) are treated as neutral. Brown and gold are discounted.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Euro / RoW Spec</h3> <p data-astro-cid-qn2a7f5i>European-spec and Rest-of-World (RoW) cars often have higher compression
+          engines and lack US safety bumpers, making them desirable to collectors. This
+          typically commands a modest premium when properly documented.</p> </div> <div class="feature-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Auction Bid Count (BaT)</h3> <p data-astro-cid-qn2a7f5i>Used as a proxy for desirability on historical BaT data only. More bids
+          at auction correlate with higher final prices. This feature is not available
+          for non-BaT listings and defaults to 0.</p> </div> </div> </section> <!-- ── Limitations ───────────────────────────────── --> <section class="section" data-astro-cid-qn2a7f5i> <h2 data-astro-cid-qn2a7f5i>Limitations &amp; Disclaimers</h2> <ul class="limitations" data-astro-cid-qn2a7f5i> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Training data size.</strong> The model is only as good as the historical
+          data available. With fewer than ~50 sales in the training set, treat predictions
+          as rough estimates, not appraisals. More BaT history = better predictions.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Condition is hard to quantify.</strong> Two cars with the same year,
+          model, and mileage can differ by $40k based on condition. The model captures
+          flags like "rust" and "recent service" but cannot assess photos or inspection
+          reports.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Market timing.</strong> G-body 911 prices have moved significantly
+          over the past 5 years. The model is a snapshot of the market at the time the
+          training data was scraped.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>Scraper accuracy.</strong> Web scrapers are brittle — they break when
+          websites change their HTML. If a scraper returns 0 results, the site may have
+          changed. The scripts log clear warnings when this happens.
+</li> <li data-astro-cid-qn2a7f5i> <strong data-astro-cid-qn2a7f5i>This is not a professional appraisal.</strong> Always inspect a car
+          in person (or hire a PPI — Pre-Purchase Inspection) before buying. This tool
+          is a starting point for research, not a substitute for due diligence.
+</li> </ul> </section> <!-- ── Data Sources ──────────────────────────────── --> <section class="section" data-astro-cid-qn2a7f5i> <h2 data-astro-cid-qn2a7f5i>Data Sources</h2> <div class="sources-grid" data-astro-cid-qn2a7f5i> <div class="source-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Bring a Trailer</h3> <p data-astro-cid-qn2a7f5i>Primary source for both active listings and historical sold results. BaT auctions
+          tend to attract well-documented, enthusiast-quality cars. Used as the training
+          dataset for the pricing model.</p> </div> <div class="source-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>eBay Motors</h3> <p data-astro-cid-qn2a7f5i>Largest volume of listings; price range varies widely. Includes both dealer
+          and private party listings. Good for finding off-the-radar deals.</p> </div> <div class="source-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>AutoTrader</h3> <p data-astro-cid-qn2a7f5i>Primarily dealer inventory. Tends toward higher asking prices. Useful for
+          understanding what dealers think the market will bear.</p> </div> <div class="source-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Cars.com</h3> <p data-astro-cid-qn2a7f5i>Mix of dealer and private listings. Similar to AutoTrader in composition.</p> </div> <div class="source-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>Cars &amp; Bids</h3> <p data-astro-cid-qn2a7f5i>Doug DeMuro's auction site. Focuses on enthusiast cars from the 1980s–2000s.
+          Well-curated listings with good photo and description quality.</p> </div> <div class="source-card" data-astro-cid-qn2a7f5i> <h3 data-astro-cid-qn2a7f5i>PCarMarket</h3> <p data-astro-cid-qn2a7f5i>Porsche-specific auction platform. Listings tend to be well-documented and
+          Porsche-enthusiast oriented.</p> </div> </div> </section> </main>  <footer> <p>
+911 Hunter — G-body Porsche 911 deal finder &nbsp;·&nbsp;
+        Data from BaT, eBay, Cars.com, AutoTrader, Cars&nbsp;&amp;&nbsp;Bids, PCarMarket &nbsp;·&nbsp;
+<a href="/911-hunter/methodology">How the pricing model works</a> </p> <p style="margin-top:8px; color: var(--text-dim);">
+Prices are model estimates only. Always do your own due diligence before buying.
+</p> </footer> </body></html> <!-- Chart.js via CDN --> <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> <script>(function(){const chartData = "{\"labels\":[\"Model Variant (ordinal)\",\"Mileage\",\"Year / Age\",\"Manual Transmission\",\"Color Premium\",\"Matching Numbers\",\"Original Engine\",\"Euro / RoW Spec\",\"Recent Service\",\"Rust Present\",\"Project Car\",\"Documented History\",\"Number of Prior Owners\",\"# of Auction Bids (BaT)\"],\"values\":[38.4,34.4,26.6,0.6,0,0,0,0,0,0,0,0,0,0]}";
+
+  const parsed = JSON.parse(chartData);
+
+  const ctx = document.getElementById("importance-chart");
+  if (ctx && typeof Chart !== "undefined") {
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: parsed.labels,
+        datasets: [{
+          label: "Feature Importance (%)",
+          data: parsed.values,
+          backgroundColor: parsed.values.map((_, i) =>
+            i === 0 ? "#D5001C" : i < 3 ? "#a5001a" : "#3a0a0e"
+          ),
+          borderColor: "#D5001C",
+          borderWidth: 1,
+          borderRadius: 4,
+        }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.parsed.x.toFixed(1)}% importance`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: "rgba(255,255,255,0.06)" },
+            ticks: { color: "#888", font: { size: 11 }, callback: (v) => v + "%" },
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: "#ccc", font: { size: 12 } },
+          },
+        },
+      },
+    });
+  }
+})();</script> 
